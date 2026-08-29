@@ -16,4 +16,3 @@ async def chat(
         raise AppError("PROMPT_TOO_LONG", "The prompt exceeds the configured limit.", 422)
     result = await service.reply(request.prompt)
     return ChatResponse(response=result.text, model=result.model, response_id=result.response_id)
-72.60.43.188

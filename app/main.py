@@ -8,7 +8,7 @@ from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging, get_logger
-from app.db.session import dispose_engine
+from app.db.session import dispose_engine, initialize_database
 
 settings = get_settings()
 configure_logging(settings.log_level)
@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    await initialize_database()
     logger.info("application_started", extra={"environment": settings.app_env})
     yield
     await dispose_engine()

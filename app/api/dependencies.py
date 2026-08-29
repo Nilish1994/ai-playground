@@ -3,13 +3,16 @@ from typing import Annotated
 
 from fastapi import Depends
 from openai import AsyncOpenAI
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError
+from app.db.session import get_db_session
 from app.services.chat import ChatService
 from app.tools.registry import ToolRegistry
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
+DbSessionDep = Annotated[AsyncSession, Depends(get_db_session)]
 
 
 @lru_cache

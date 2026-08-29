@@ -18,7 +18,8 @@ RUN groupadd --system app && useradd --system --gid app --create-home app
 WORKDIR /app
 COPY --from=builder /wheels /wheels
 RUN pip install --no-cache-dir --no-index --find-links=/wheels ai-playground && rm -rf /wheels
+COPY alembic.ini ./
+COPY migrations ./migrations
 USER app
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--no-server-header"]
-
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --no-server-header"]

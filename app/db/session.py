@@ -13,5 +13,12 @@ async def get_db_session() -> AsyncIterator[AsyncSession]:
         yield session
 
 
+async def initialize_database() -> None:
+    from app.services.projects import seed_projects
+
+    async with _session_factory() as session:
+        await seed_projects(session)
+
+
 async def dispose_engine() -> None:
     await _engine.dispose()
