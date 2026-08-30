@@ -153,6 +153,12 @@ class ProjectRead(BaseModel):
     recent_events: list[ProjectEventRead]
 
 
+class TaskExecutionAccepted(BaseModel):
+    project_id: str
+    task_id: str
+    status: str = "accepted"
+
+
 class ProjectEventEnvelope(BaseModel):
     event: ProjectEventRead
     project: ProjectRead

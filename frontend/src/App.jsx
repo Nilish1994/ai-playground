@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import ActivityStream from "./components/ActivityStream.jsx";
-import BriefsPanel from "./components/BriefsPanel.jsx";
+import ProjectOverview, { projectHealth } from "./components/ProjectOverview.jsx";
 import ProjectStatus from "./components/ProjectStatus.jsx";
 import TaskConsole from "./components/TaskConsole.jsx";
 import { useProjectDashboard } from "./hooks/useProjectDashboard.js";
@@ -19,37 +19,45 @@ export default function App() {
   return (
     <main className="console">
       <header className="console-header">
-        <div><p>AI PLAYGROUND // PROJECT OPERATIONS</p><h1>project_status</h1></div>
+        <div><p>AI PLAYGROUND // PROJECT OVERVIEW</p><h1>Your projects at a glance</h1></div>
         <p className={`connection ${isLive ? "live" : "offline"}`}>
-          <span aria-hidden="true" /> {isLive ? "LIVE" : "CONNECTING"}
+          <span aria-hidden="true" /> {isLive ? "CONNECTED" : "RECONNECTING"}
         </p>
       </header>
 
-      <section className="summary" aria-label="Project summary">
-        <span>projects: {projects.length}</span>
-        <span>running: {projects.filter((project) => project.status === "RUNNING").length}</span>
-        <span>failed: {projects.filter((project) => project.status === "FAILED").length}</span>
-        <span>source: postgres+sse</span>
-      </section>
-
       {error && <p className="system-error">! {error}</p>}
       {isLoading ? <p className="system-message">&gt; loading project state…</p> : (
-        <section className="project-grid" aria-label="Projects">
+        <nav className="project-tabs" aria-label="Choose a project">
           {projects.map((project) => (
-            <ProjectStatus
+            <button
               key={project.id}
-              project={project}
-              selected={project.id === selectedProjectId}
-              onSelect={() => setSelectedProjectId(project.id)}
-            />
+              type="button"
+              className={project.id === selectedProjectId ? "active" : ""}
+              onClick={() => setSelectedProjectId(project.id)}
+            >
+              <span>{project.name}</span>
+              <small>{projectHealth(project.status)}</small>
+            </button>
           ))}
-        </section>
+        </nav>
       )}
 
-      {selectedProject && <BriefsPanel project={selectedProject} />}
-      {selectedProject && <TaskConsole project={selectedProject} />}
-      <ActivityStream events={activity} />
-      <footer>&gt; dashboard ready — listening for project and task events</footer>
+      {selectedProject && (
+        <>
+          <ProjectOverview project={selectedProject} isLive={isLive} />
+
+          <details className="technical-details">
+            <summary><span>&gt;</span> Technical Details</summary>
+            <div className="technical-content">
+              <ProjectStatus project={selectedProject} selected={false} onSelect={() => {}} />
+              <TaskConsole project={selectedProject} />
+              <ActivityStream events={activity} />
+            </div>
+          </details>
+        </>
+      )}
+
+      <footer>&gt; Project information updates automatically</footer>
     </main>
   );
 }

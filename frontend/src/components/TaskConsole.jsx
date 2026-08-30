@@ -55,7 +55,7 @@ export default function TaskConsole({ project }) {
   return (
     <section className="task-console" aria-labelledby="task-console-title">
       <header className="section-heading">
-        <h2 id="task-console-title">{project.name} // task_history</h2>
+        <h2 id="task-console-title">{project.name} // Recent Work</h2>
         <span>{project.tasks.length} tasks</span>
       </header>
 
@@ -82,7 +82,7 @@ export default function TaskConsole({ project }) {
             <span>task: {selectedTask?.title ?? "none"}</span>
             <span>agent: {selectedTask?.agent ?? "not assigned"}</span>
           </div>
-          <h3>codex_activity</h3>
+          <h3>Technical Activity</h3>
           <ol>
             {events.map((event) => (
               <li key={event.id}>

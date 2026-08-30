@@ -19,15 +19,15 @@ export default function ProjectStatus({ project, selected, onSelect }) {
       </header>
 
       <dl className="project-details">
-        <dt>path</dt><dd>{project.path}</dd>
-        <dt>current_task</dt><dd>{project.currentTask}</dd>
-        <dt>last_completed</dt><dd>{project.lastCompletedTask}</dd>
-        <dt>updated</dt><dd>{formatTime(project.lastUpdated)}</dd>
-        <dt>agent</dt><dd>{project.agent ?? "not assigned"}</dd>
+        <dt>Project Path</dt><dd>{project.path}</dd>
+        <dt>Current Work</dt><dd>{project.currentTask}</dd>
+        <dt>Last Completed</dt><dd>{project.lastCompletedTask}</dd>
+        <dt>Last Updated</dt><dd>{formatTime(project.lastUpdated)}</dd>
+        <dt>Agent</dt><dd>{project.agent ?? "not assigned"}</dd>
       </dl>
 
       <section className="project-section" aria-label={`${project.name} checks`}>
-        <h3>checks</h3>
+        <h3>Test and Build Results</h3>
         <ul className="checks">
           {project.checks.map((check) => (
             <li key={check.label}>
@@ -40,7 +40,7 @@ export default function ProjectStatus({ project, selected, onSelect }) {
       </section>
 
       <section className="project-section" aria-label={`${project.name} changed files`}>
-        <h3>recent_files</h3>
+        <h3>Files Changed</h3>
         {project.changedFiles.length ? (
           <ul className="file-list">
             {project.changedFiles.map((file) => <li key={file}>{file}</li>)}

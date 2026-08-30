@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     openai_timeout_seconds: float = Field(default=30.0, gt=0)
     openai_max_retries: int = Field(default=2, ge=0, le=10)
     chat_max_prompt_length: int = Field(default=10_000, ge=1, le=100_000)
+    codex_cli_path: str = "/usr/local/bin/codex"
+    codex_home: str = "/home/app/.codex"
 
     @field_validator("log_level")
     @classmethod

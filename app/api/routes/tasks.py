@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 
 from app.api.dependencies import DbSessionDep
 from app.schemas.projects import (
@@ -9,7 +9,9 @@ from app.schemas.projects import (
     ProjectTaskDetail,
     ProjectTaskRead,
     TaskAction,
+    TaskExecutionAccepted,
 )
+from app.services.codex_executor import codex_executor
 from app.services.tasks import (
     complete_task,
     create_task,
@@ -39,6 +41,22 @@ async def new_task(
 @router.get("/{task_id}", response_model=ProjectTaskDetail)
 async def task(project_id: str, task_id: str, session: DbSessionDep) -> ProjectTaskDetail:
     return await get_task(session, project_id, task_id)
+
+
+@router.post(
+    "/{task_id}/execute",
+    response_model=TaskExecutionAccepted,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def execute(
+    project_id: str,
+    task_id: str,
+    background_tasks: BackgroundTasks,
+    session: DbSessionDep,
+) -> TaskExecutionAccepted:
+    request = await codex_executor.reserve(session, project_id, task_id)
+    background_tasks.add_task(codex_executor.execute, request)
+    return TaskExecutionAccepted(project_id=project_id, task_id=task_id)
 
 
 @router.post("/{task_id}/start", response_model=ProjectTaskRead)

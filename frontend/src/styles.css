@@ -156,6 +156,80 @@ footer { padding-top: 18px; color: #4eaa61; font-size: 11px; }
 .brief-empty { padding: 14px 0 18px; margin: 0; }
 @media (max-width: 760px) { .brief-list { grid-template-columns: 1fr; } }
 
+
+.project-tabs {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid #344036;
+}
+.project-tabs button {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  min-width: 210px;
+  padding: 14px 18px;
+  border: 0;
+  border-right: 1px solid #222a23;
+  border-radius: 0;
+  background: transparent;
+  color: #7d887f;
+  text-align: left;
+  cursor: pointer;
+}
+.project-tabs button::before { content: ">"; color: #4f5951; }
+.project-tabs button.active { background: #101411; color: #d5e4d7; box-shadow: inset 0 -2px #62d478; }
+.project-tabs button.active::before { color: #62d478; }
+.project-tabs small { margin-left: auto; color: #69736b; font-size: 9px; letter-spacing: .08em; }
+
+.human-overview { padding: 26px 0 10px; }
+.overview-title { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 20px; border-bottom: 1px solid #344036; }
+.overview-title > div { display: flex; align-items: baseline; gap: 10px; }
+.overview-title h2 { margin: 0; color: #d5e4d7; font-size: clamp(20px, 3vw, 28px); font-weight: 500; }
+.health { color: #9a9a87; font-size: 11px; font-weight: 700; letter-spacing: .09em; white-space: nowrap; }
+.health i { display: inline-block; width: 8px; height: 8px; margin-right: 7px; background: currentColor; border-radius: 50%; }
+.health-healthy { color: #66b8d4; }
+.health-working { color: #62d478; }
+.health-attention { color: #e16f6f; }
+
+.overview-section { padding: 22px 0; border-bottom: 1px solid #222a23; }
+.overview-section h3 { margin: 0 0 11px; color: #78817a; font-size: 11px; font-weight: 500; letter-spacing: .08em; }
+.overview-section > p { max-width: 850px; margin: 0; color: #b8c1ba; font-size: 13px; line-height: 1.65; }
+.overview-section .work-title { color: #d5e4d7; font-size: 16px; }
+.current-work dl, .system-overview dl { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 8px 16px; margin: 15px 0 0; font-size: 12px; }
+.current-work dt, .system-overview dt { color: #69736b; }
+.current-work dd, .system-overview dd { margin: 0; color: #bdc5be; }
+.system-overview dd { color: #62d478; }
+.overview-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; border-bottom: 1px solid #222a23; }
+.overview-columns .overview-section { border-bottom: 0; }
+.human-list { margin: 0; padding: 0; list-style: none; }
+.human-list li { position: relative; padding: 5px 0 5px 24px; color: #aeb8b0; font-size: 12px; line-height: 1.5; }
+.human-list li::before { position: absolute; left: 0; color: #62d478; }
+.completed-list li::before { content: "✓"; }
+.completed-list strong, .completed-list span { display: block; }
+.completed-list strong { color: #bdc5be; font-size: 12px; font-weight: 500; }
+.completed-list span { margin-top: 2px; color: #78817a; font-size: 11px; }
+.next-list li::before { content: "○"; color: #c6a75e; }
+.decision-list li::before { content: "•"; color: #66b8d4; }
+.human-empty { color: #606862 !important; font-size: 11px !important; }
+
+.technical-details { margin-top: 18px; border-top: 1px solid #344036; border-bottom: 1px solid #344036; }
+.technical-details > summary { padding: 16px 0; color: #89948b; font-size: 12px; cursor: pointer; list-style: none; }
+.technical-details > summary::-webkit-details-marker { display: none; }
+.technical-details > summary span { display: inline-block; margin-right: 8px; color: #62d478; transition: transform .12s ease; }
+.technical-details[open] > summary span { transform: rotate(90deg); }
+.technical-content { padding-bottom: 18px; border-top: 1px solid #222a23; }
+.technical-content > .project { padding-right: 0; border-bottom: 1px solid #344036; }
+
+@media (max-width: 760px) {
+  .overview-columns { grid-template-columns: 1fr; gap: 0; }
+  .overview-columns .overview-section + .overview-section { border-top: 1px solid #222a23; }
+}
+
+@media (max-width: 560px) {
+  .overview-title { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .current-work dl, .system-overview dl { grid-template-columns: 105px minmax(0, 1fr); }
+}
 /* Retained for the existing chat component when it is mounted again. */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
 

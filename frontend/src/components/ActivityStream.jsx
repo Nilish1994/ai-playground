@@ -13,7 +13,7 @@ export default function ActivityStream({ events }) {
   return (
     <section className="activity" aria-labelledby="activity-title">
       <header className="section-heading">
-        <h2 id="activity-title">activity_stream</h2>
+        <h2 id="activity-title">Activity Log</h2>
         <span>{events.length} events</span>
       </header>
       <ol>

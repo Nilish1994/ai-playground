@@ -2,6 +2,25 @@ services:
   api:
     build: .
     env_file: .env
+    # OpenAI secure-container capabilities required by Codex bubblewrap.
+    cap_add:
+      - SYS_ADMIN
+      - SYS_CHROOT
+      - SETUID
+      - SETGID
+      - SYS_PTRACE
+      - NET_ADMIN
+      - NET_RAW
+    security_opt:
+      - seccomp=unconfined
+      - apparmor=unconfined
+    volumes:
+      - /home/nilish/.vscode-server/extensions/openai.chatgpt-26.5825.41651-linux-x64/bin/linux-x86_64/codex:/usr/local/bin/codex:ro
+      - /home/nilish/.vscode-server/extensions/openai.chatgpt-26.5825.41651-linux-x64/bin/linux-x86_64/codex-code-mode-host:/usr/local/bin/codex-code-mode-host:ro
+      - /home/nilish/.codex/auth.json:/home/app/.codex/auth.json:ro
+      - /home/nilish/.codex/config.toml:/home/app/.codex/config.toml:ro
+      - /srv/projects/ai-playground:/srv/projects/ai-playground
+      - /srv/projects/project-two-web:/srv/projects/project-two-web
     ports:
       - "8001:8000"
     depends_on:
