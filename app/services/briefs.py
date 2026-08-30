@@ -74,9 +74,7 @@ async def list_briefs(session: AsyncSession, project_id: str) -> list[ProjectBri
     return [brief_to_schema(brief) for brief in briefs]
 
 
-async def get_brief(
-    session: AsyncSession, project_id: str, brief_id: str
-) -> ProjectBriefRead:
+async def get_brief(session: AsyncSession, project_id: str, brief_id: str) -> ProjectBriefRead:
     return brief_to_schema(await _brief(session, project_id, brief_id))
 
 

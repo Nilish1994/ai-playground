@@ -22,13 +22,13 @@ from app.schemas.projects import (
     ProjectStatus,
     TaskAction,
 )
+from app.services.codex_prompts import build_codex_prompt
+from app.services.memories import get_project_context
 from app.services.projects import create_project_event
 from app.services.tasks import complete_task, fail_task, start_task
 
 logger = get_logger(__name__)
-ALLOWED_PROJECT_PATHS = frozenset(
-    {"/srv/projects/ai-playground", "/srv/projects/project-two-web"}
-)
+ALLOWED_PROJECT_PATHS = frozenset({"/srv/projects/ai-playground", "/srv/projects/project-two-web"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -179,6 +179,17 @@ class CodexExecutor:
             async with self._lock:
                 self._reserved.discard(request.task_id)
 
+    async def _load_context_prompt(self, session: AsyncSession, request: ExecutionRequest) -> str:
+        project_context = await get_project_context(session, request.project_id)
+        await self._event(
+            session,
+            request,
+            ProjectEventType.CONTEXT_LOADED,
+            ProjectStatus.RUNNING,
+            f"Loaded concise {project_context.project_name} project context for Codex execution.",
+        )
+        return build_codex_prompt(project_context, request.prompt)
+
     async def _execute(self, session: AsyncSession, request: ExecutionRequest) -> None:
         await start_task(
             session,
@@ -186,6 +197,7 @@ class CodexExecutor:
             request.task_id,
             TaskAction(message="Codex execution started", agent="Codex"),
         )
+        codex_prompt = await self._load_context_prompt(session, request)
         await self._event(
             session,
             request,
@@ -212,7 +224,7 @@ class CodexExecutor:
             env=self._codex_environment(),
         )
         assert process.stdin is not None
-        process.stdin.write(request.prompt.encode())
+        process.stdin.write(codex_prompt.encode())
         await process.stdin.drain()
         process.stdin.close()
 

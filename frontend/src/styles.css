@@ -271,3 +271,12 @@ footer { padding-top: 18px; color: #4eaa61; font-size: 11px; }
 .label-pass, .label-done { color: #62d478; }
 .task-timeline code { grid-column: 3; color: #c6a75e; overflow-wrap: anywhere; }
 @media (max-width: 760px) { .task-layout { grid-template-columns: 1fr; } .task-history { border-right: 0; border-bottom: 1px solid #344036; } .task-timeline { padding-left: 0; } }
+.project-memory dl { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 8px 16px; margin: 0; font-size: 12px; }
+.project-memory dt { color: #69736b; }
+.project-memory dd { margin: 0; color: #bdc5be; line-height: 1.55; }
+.memory-details { margin-top: 14px; border-top: 1px solid #171c18; }
+.memory-details summary { padding: 11px 0 4px; color: #78817a; font-size: 11px; cursor: pointer; }
+.memory-details summary span { color: #62d478; }
+.memory-details p { margin: 8px 0 0; color: #87958a; font-size: 11px; line-height: 1.55; }
+.memory-details strong { color: #9eaaa0; font-weight: 500; }
+@media (max-width: 560px) { .project-memory dl { grid-template-columns: 105px minmax(0, 1fr); } }

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError
 from app.db.models.brief import ProjectBrief
+from app.db.models.memory import ProjectMemory
 from app.db.models.project import Project, ProjectEvent
 from app.db.models.task import ProjectTask
 from app.schemas.projects import (
@@ -18,6 +19,7 @@ from app.schemas.projects import (
     ProjectTaskRead,
 )
 from app.services.briefs import brief_to_schema
+from app.services.memories import ensure_project_memory, memory_to_schema
 from app.services.project_events import project_event_broker
 
 SEED_PROJECTS = (
@@ -88,6 +90,9 @@ async def seed_projects(session: AsyncSession) -> None:
         if project["id"] not in existing:
             session.add(Project(**project, status="IDLE", recent_files=[], checks=[]))
     await session.commit()
+    project_ids = (await session.scalars(select(Project.id))).all()
+    for project_id in project_ids:
+        await ensure_project_memory(session, project_id)
 
 
 async def list_projects(session: AsyncSession) -> list[ProjectRead]:
@@ -148,6 +153,11 @@ async def create_project_event(
 
 
 async def build_project_read(session: AsyncSession, project: Project) -> ProjectRead:
+    memory = await session.scalar(
+        select(ProjectMemory).where(ProjectMemory.project_id == project.id)
+    )
+    if memory is None:
+        memory = await ensure_project_memory(session, project.id)
     events = (
         await session.scalars(
             select(ProjectEvent)
@@ -181,11 +191,11 @@ async def build_project_read(session: AsyncSession, project: Project) -> Project
         updated_at=project.updated_at,
         recent_files=project.recent_files,
         checks=[ProjectCheck.model_validate(check) for check in project.checks],
+        memory=memory_to_schema(memory),
         tasks=[task_to_schema(task) for task in tasks],
         briefs=[brief_to_schema(brief) for brief in briefs],
         recent_events=[event_to_schema(event) for event in events],
     )
-
 
 
 def task_to_schema(task: ProjectTask) -> ProjectTaskRead:

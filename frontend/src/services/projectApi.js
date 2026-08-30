@@ -32,6 +32,22 @@ function normalizeBrief(brief) {
   };
 }
 
+function normalizeMemory(memory) {
+  if (!memory) return null;
+  return {
+    id: memory.id,
+    projectId: memory.project_id,
+    purpose: memory.purpose,
+    currentState: memory.current_state,
+    architectureSummary: memory.architecture_summary,
+    importantDecisions: memory.important_decisions,
+    codingRules: memory.coding_rules,
+    currentFocus: memory.current_focus,
+    nextSteps: memory.next_steps,
+    updatedAt: memory.updated_at,
+  };
+}
+
 function normalizeEvent(event, project) {
   return {
     id: event.event_id,
@@ -60,6 +76,7 @@ export function normalizeProject(project) {
     agent: project.active_agent,
     changedFiles: project.recent_files,
     checks: project.checks,
+    memory: normalizeMemory(project.memory),
     tasks: project.tasks.map(normalizeTask),
     briefs: (project.briefs || []).map(normalizeBrief),
     activity: project.recent_events.map((event) => normalizeEvent(event, project)),

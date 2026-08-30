@@ -20,6 +20,7 @@ export default function ProjectOverview({ project, isLive }) {
   const plannedTasks = newest(project.tasks, "PENDING");
   const completedTasks = newest(project.tasks, "DONE").slice(0, 10);
   const latestBrief = project.briefs[0];
+  const memory = project.memory;
   const decisions = [...new Set(project.briefs.flatMap((brief) => brief.decisions))].slice(0, 5);
   const currentResult = currentTask?.resultSummary
     || (currentTask ? "Work is underway. Updates will appear here automatically." : null);
@@ -35,7 +36,30 @@ export default function ProjectOverview({ project, isLive }) {
 
       <section className="overview-section">
         <h3>WHAT ARE WE BUILDING?</h3>
-        <p>{latestBrief?.summary || "No project purpose has been recorded yet."}</p>
+        <p>{memory?.purpose || latestBrief?.summary || "No project purpose has been recorded yet."}</p>
+      </section>
+
+      <section className="overview-section project-memory">
+        <h3>PROJECT MEMORY</h3>
+        <dl>
+          <dt>Purpose</dt><dd>{memory?.purpose || "Not recorded yet."}</dd>
+          <dt>Current state</dt><dd>{memory?.currentState || "Not recorded yet."}</dd>
+          <dt>Current focus</dt><dd>{memory?.currentFocus || "No focus recorded."}</dd>
+          <dt>Next steps</dt>
+          <dd>
+            {memory?.nextSteps?.length
+              ? memory.nextSteps.join(" · ")
+              : "No next steps recorded."}
+          </dd>
+        </dl>
+        {memory && (memory.architectureSummary || memory.importantDecisions.length || memory.codingRules.length) && (
+          <details className="memory-details">
+            <summary><span aria-hidden="true">›</span> More project context</summary>
+            {memory.architectureSummary && <p><strong>Architecture:</strong> {memory.architectureSummary}</p>}
+            {memory.importantDecisions.length > 0 && <p><strong>Decisions:</strong> {memory.importantDecisions.join(" · ")}</p>}
+            {memory.codingRules.length > 0 && <p><strong>Coding rules:</strong> {memory.codingRules.join(" · ")}</p>}
+          </details>
+        )}
       </section>
 
       <section className="overview-section current-work">

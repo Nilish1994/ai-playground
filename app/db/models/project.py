@@ -10,6 +10,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.db.models.brief import ProjectBrief
+    from app.db.models.memory import ProjectMemory
     from app.db.models.task import ProjectTask
 
 
@@ -40,6 +41,9 @@ class Project(Base):
     )
     briefs: Mapped[list[ProjectBrief]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
+    )
+    memory: Mapped[ProjectMemory | None] = relationship(
+        back_populates="project", cascade="all, delete-orphan", uselist=False
     )
     events: Mapped[list[ProjectEvent]] = relationship(
         back_populates="project", cascade="all, delete-orphan"

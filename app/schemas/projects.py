@@ -31,6 +31,7 @@ class ProjectEventType(StrEnum):
     PROMPT_GENERATED = "prompt_generated"
     TASK_STARTED = "task_started"
     AGENT_STARTED = "agent_started"
+    CONTEXT_LOADED = "context_loaded"
     AGENT_THINKING = "agent_thinking"
     COMMAND_STARTED = "command_started"
     COMMAND_COMPLETED = "command_completed"
@@ -137,6 +138,30 @@ class ProjectBriefRead(BaseModel):
     updated_at: datetime
 
 
+class ProjectMemoryUpdate(BaseModel):
+    purpose: str = Field(default="", max_length=2_000)
+    current_state: str = Field(default="", max_length=2_000)
+    architecture_summary: str = Field(default="", max_length=3_000)
+    important_decisions: list[str] = Field(default_factory=list, max_length=20)
+    coding_rules: list[str] = Field(default_factory=list, max_length=20)
+    current_focus: str = Field(default="", max_length=2_000)
+    next_steps: list[str] = Field(default_factory=list, max_length=20)
+
+
+class ProjectMemoryRead(ProjectMemoryUpdate):
+    id: str
+    project_id: str
+    updated_at: datetime
+
+
+class ProjectContext(BaseModel):
+    project_id: str
+    project_name: str
+    memory: ProjectMemoryRead
+    active_brief: ProjectBriefRead | None
+    current_task: ProjectTaskRead | None
+
+
 class ProjectRead(BaseModel):
     id: str
     name: str
@@ -148,6 +173,7 @@ class ProjectRead(BaseModel):
     updated_at: datetime
     recent_files: list[str]
     checks: list[ProjectCheck]
+    memory: ProjectMemoryRead | None
     tasks: list[ProjectTaskRead]
     briefs: list[ProjectBriefRead]
     recent_events: list[ProjectEventRead]
