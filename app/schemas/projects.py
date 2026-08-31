@@ -45,6 +45,7 @@ class ProjectEventType(StrEnum):
     BUILD_PASSED = "build_passed"
     BUILD_FAILED = "build_failed"
     AGENT_FINISHED = "agent_finished"
+    MEMORY_UPDATED = "memory_updated"
     TASK_COMPLETED = "task_completed"
     TASK_FAILED = "task_failed"
 
@@ -76,6 +77,7 @@ class ProjectTaskCreate(BaseModel):
     description: str | None = None
     prompt: str | None = None
     agent: str | None = Field(default=None, max_length=160)
+    updates_memory: bool = False
 
 
 class TaskAction(BaseModel):
@@ -93,6 +95,9 @@ class ProjectTaskRead(BaseModel):
     status: TaskStatus
     agent: str | None
     result_summary: str | None
+    updates_memory: bool = False
+    memory_refresh_attempted_at: datetime | None = None
+    memory_refresh_completed_at: datetime | None = None
     created_at: datetime
     started_at: datetime | None
     completed_at: datetime | None

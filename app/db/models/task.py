@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Text, func
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -32,6 +32,9 @@ class ProjectTask(Base):
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="PENDING")
     agent: Mapped[str | None] = mapped_column(String(160))
     result_summary: Mapped[str | None] = mapped_column(Text)
+    updates_memory: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    memory_refresh_attempted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    memory_refresh_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

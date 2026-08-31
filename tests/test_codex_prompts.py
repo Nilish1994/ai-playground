@@ -141,3 +141,159 @@ async def test_executor_loads_context_and_emits_safe_event_before_execution(monk
     assert event_args[2] == ProjectEventType.CONTEXT_LOADED
     assert event_args[4] == "Loaded concise AI Playground project context for Codex execution."
     assert "Personal AI control room" not in event_args[4]
+
+
+@pytest.mark.asyncio
+async def test_sequential_executions_load_only_their_own_project_context(monkeypatch) -> None:
+    ai_context = context(
+        purpose="AI Playground unique context",
+        active_brief=False,
+    )
+    office_context = context(
+        "office-project",
+        "Office Project",
+        purpose="Office Project unique context",
+        active_brief=False,
+    )
+    get_context = AsyncMock(side_effect=[ai_context, office_context])
+    monkeypatch.setattr(executor_module, "get_project_context", get_context)
+    executor = CodexExecutor()
+    executor._event = AsyncMock()
+    session = object()
+    ai_request = ExecutionRequest(
+        "ai-playground",
+        "task-ai",
+        Path("/srv/projects/ai-playground"),
+        "Build AI feature",
+    )
+    office_request = ExecutionRequest(
+        "office-project",
+        "task-office",
+        Path("/srv/projects/project-two-web"),
+        "Build office feature",
+    )
+
+    ai_prompt = await executor._load_context_prompt(session, ai_request)
+    office_prompt = await executor._load_context_prompt(session, office_request)
+
+    assert "AI Playground unique context" in ai_prompt
+    assert "Office Project unique context" not in ai_prompt
+    assert "Office Project unique context" in office_prompt
+    assert "AI Playground unique context" not in office_prompt
+    assert get_context.await_args_list[0].args == (session, "ai-playground")
+    assert get_context.await_args_list[1].args == (session, "office-project")
+    assert executor._event.await_args_list[0].args[1] is ai_request
+    assert executor._event.await_args_list[1].args[1] is office_request
+
+
+class _FakeStdin:
+    def __init__(self) -> None:
+        self.data = b""
+
+    def write(self, data: bytes) -> None:
+        self.data += data
+
+    async def drain(self) -> None:
+        return None
+
+    def close(self) -> None:
+        return None
+
+
+class _EmptyStdout:
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        raise StopAsyncIteration
+
+
+class _FakeProcess:
+    def __init__(self) -> None:
+        self.stdin = _FakeStdin()
+        self.stdout = _EmptyStdout()
+        self.stderr = None
+
+    async def wait(self) -> int:
+        return 0
+
+
+@pytest.mark.asyncio
+async def test_sequential_executions_launch_with_each_registered_working_directory(
+    monkeypatch,
+) -> None:
+    processes = [_FakeProcess(), _FakeProcess()]
+    launch = AsyncMock(side_effect=processes)
+    monkeypatch.setattr(executor_module.asyncio, "create_subprocess_exec", launch)
+    monkeypatch.setattr(executor_module, "start_task", AsyncMock())
+    monkeypatch.setattr(executor_module, "complete_task", AsyncMock())
+    executor = CodexExecutor()
+    executor._load_context_prompt = AsyncMock(side_effect=["AI prompt", "Office prompt"])
+    executor._worktree_snapshot = AsyncMock(side_effect=[{}, {}, {}, {}])
+    executor._event = AsyncMock()
+    session = object()
+    requests = [
+        ExecutionRequest(
+            "ai-playground",
+            "task-ai",
+            Path("/srv/projects/ai-playground"),
+            "AI task",
+        ),
+        ExecutionRequest(
+            "office-project",
+            "task-office",
+            Path("/srv/projects/project-two-web"),
+            "Office task",
+        ),
+    ]
+
+    for request in requests:
+        await executor._execute(session, request)
+
+    first_args = launch.await_args_list[0].args
+    second_args = launch.await_args_list[1].args
+    assert first_args[first_args.index("--cd") + 1] == "/srv/projects/ai-playground"
+    assert second_args[second_args.index("--cd") + 1] == "/srv/projects/project-two-web"
+    assert processes[0].stdin.data == b"AI prompt"
+    assert processes[1].stdin.data == b"Office prompt"
+    assert all(call.args[1] is requests[0] for call in executor._event.await_args_list[:2])
+    assert all(call.args[1] is requests[1] for call in executor._event.await_args_list[2:])
+
+
+@pytest.mark.asyncio
+async def test_sequential_events_keep_their_project_and_task_ids(monkeypatch) -> None:
+    create_event = AsyncMock()
+    monkeypatch.setattr(executor_module, "create_project_event", create_event)
+    executor = CodexExecutor()
+    session = object()
+    ai_request = ExecutionRequest(
+        "ai-playground", "task-ai", Path("/srv/projects/ai-playground"), "AI task"
+    )
+    office_request = ExecutionRequest(
+        "office-project",
+        "task-office",
+        Path("/srv/projects/project-two-web"),
+        "Office task",
+    )
+
+    await executor._event(
+        session,
+        ai_request,
+        ProjectEventType.AGENT_STARTED,
+        executor_module.ProjectStatus.RUNNING,
+        "AI event",
+    )
+    await executor._event(
+        session,
+        office_request,
+        ProjectEventType.AGENT_STARTED,
+        executor_module.ProjectStatus.RUNNING,
+        "Office event",
+    )
+
+    first = create_event.await_args_list[0]
+    second = create_event.await_args_list[1]
+    assert first.args[1] == "ai-playground"
+    assert first.args[2].task_id == "task-ai"
+    assert second.args[1] == "office-project"
+    assert second.args[2].task_id == "task-office"

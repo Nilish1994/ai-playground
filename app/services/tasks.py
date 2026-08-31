@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError
+from app.core.logging import get_logger
 from app.db.models.project import Project, ProjectEvent
 from app.db.models.task import ProjectTask
 from app.schemas.projects import (
@@ -18,7 +19,10 @@ from app.schemas.projects import (
     ProjectTaskRead,
     TaskAction,
 )
+from app.services.memory_refresh import refresh_project_memory_after_task
 from app.services.projects import create_project_event, event_to_schema, task_to_schema
+
+logger = get_logger(__name__)
 
 
 def apply_task_event_transition(
@@ -79,6 +83,7 @@ async def create_task(
         prompt=payload.prompt,
         status="PENDING",
         agent=payload.agent,
+        updates_memory=payload.updates_memory,
         created_at=timestamp,
         updated_at=timestamp,
     )
@@ -140,6 +145,17 @@ async def complete_task(
         ),
         task,
     )
+    try:
+        await refresh_project_memory_after_task(session, project_id, task_id)
+    except Exception as error:
+        logger.warning(
+            "project_memory_refresh_unexpected_failure",
+            extra={
+                "project_id": project_id,
+                "task_id": task_id,
+                "error_type": type(error).__name__,
+            },
+        )
     return envelope.task
 
 
