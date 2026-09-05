@@ -11,6 +11,8 @@ services:
       - SYS_PTRACE
       - NET_ADMIN
       - NET_RAW
+    group_add:
+      - "988"
     security_opt:
       - seccomp=unconfined
       - apparmor=unconfined
@@ -19,8 +21,14 @@ services:
       - /home/nilish/.vscode-server/extensions/openai.chatgpt-26.5825.41651-linux-x64/bin/linux-x86_64/codex-code-mode-host:/usr/local/bin/codex-code-mode-host:ro
       - /home/nilish/.codex/auth.json:/home/app/.codex/auth.json:ro
       - /home/nilish/.codex/config.toml:/home/app/.codex/config.toml:ro
-      - /srv/projects/ai-playground:/srv/projects/ai-playground
-      - /srv/projects/project-two-web:/srv/projects/project-two-web
+      - /srv/projects:/srv/projects
+      - /etc/hostname:/host/etc/hostname:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - office_project
     ports:
       - "8001:8000"
     depends_on:
@@ -51,4 +59,9 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  office_project:
+    external: true
+    name: project-two-web_default
 

@@ -3,11 +3,14 @@ import { useEffect, useState } from "react";
 import ActivityStream from "./components/ActivityStream.jsx";
 import ProjectOverview, { projectHealth } from "./components/ProjectOverview.jsx";
 import ProjectStatus from "./components/ProjectStatus.jsx";
+import SystemStatus, { ContainerDetails } from "./components/SystemStatus.jsx";
 import TaskConsole from "./components/TaskConsole.jsx";
 import { useProjectDashboard } from "./hooks/useProjectDashboard.js";
+import { useSystemStatus } from "./hooks/useSystemStatus.js";
 
 export default function App() {
   const { projects, activity, isLoading, isLive, error } = useProjectDashboard();
+  const system = useSystemStatus();
   const [selectedProjectId, setSelectedProjectId] = useState(null);
 
   useEffect(() => {
@@ -24,6 +27,8 @@ export default function App() {
           <span aria-hidden="true" /> {isLive ? "CONNECTED" : "RECONNECTING"}
         </p>
       </header>
+
+      <SystemStatus {...system} />
 
       {error && <p className="system-error">! {error}</p>}
       {isLoading ? <p className="system-message">&gt; loading project state…</p> : (
@@ -49,6 +54,7 @@ export default function App() {
           <details className="technical-details">
             <summary><span>&gt;</span> Technical Details</summary>
             <div className="technical-content">
+              <ContainerDetails status={system.status} />
               <ProjectStatus project={selectedProject} selected={false} onSelect={() => {}} />
               <TaskConsole project={selectedProject} />
               <ActivityStream events={activity} />

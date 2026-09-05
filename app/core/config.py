@@ -26,6 +26,14 @@ class Settings(BaseSettings):
     chat_max_prompt_length: int = Field(default=10_000, ge=1, le=100_000)
     codex_cli_path: str = "/usr/local/bin/codex"
     codex_home: str = "/home/app/.codex"
+    projects_root: str = "/srv/projects"
+    telemetry_hostname_file: str = "/host/etc/hostname"
+    telemetry_disk_path: str = "/"
+    telemetry_docker_socket: str = "/var/run/docker.sock"
+    telemetry_http_timeout_seconds: float = Field(default=1.0, gt=0, le=5)
+    telemetry_nginx_url: str = "http://host.docker.internal/"
+    telemetry_office_frontend_url: str = "http://frontend:3000/"
+    telemetry_office_backend_url: str = "http://backend:8000/api/health"
 
     @field_validator("log_level")
     @classmethod

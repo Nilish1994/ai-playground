@@ -113,15 +113,6 @@ export default function ProjectOverview({ project, isLive }) {
           <p className="human-empty">No recent decisions have been recorded.</p>
         )}
       </section>
-
-      <section className="overview-section system-overview">
-        <h3>SYSTEM STATUS</h3>
-        <dl>
-          <dt>API</dt><dd>Healthy</dd>
-          <dt>Database</dt><dd>Healthy</dd>
-          <dt>Live connection</dt><dd>{isLive ? "Connected" : "Reconnecting"}</dd>
-        </dl>
-      </section>
     </article>
   );
 }

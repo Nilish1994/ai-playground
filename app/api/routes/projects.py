@@ -5,7 +5,14 @@ from fastapi.responses import StreamingResponse
 
 from app.api.dependencies import DbSessionDep, SettingsDep
 from app.core.errors import AppError
-from app.schemas.projects import ProjectEventCreate, ProjectEventEnvelope, ProjectRead
+from app.schemas.projects import (
+    ProjectDiscoveryResult,
+    ProjectEventCreate,
+    ProjectEventEnvelope,
+    ProjectOnboardingResult,
+    ProjectRead,
+)
+from app.services.project_discovery import discover_projects, onboard_project
 from app.services.project_events import project_event_broker
 from app.services.projects import create_project_event, get_project, list_projects
 
@@ -16,6 +23,18 @@ events_router = APIRouter(prefix="/events", tags=["events"])
 @router.get("", response_model=list[ProjectRead])
 async def projects(session: DbSessionDep) -> list[ProjectRead]:
     return await list_projects(session)
+
+
+@router.post("/discover", response_model=ProjectDiscoveryResult)
+async def discover(session: DbSessionDep, settings: SettingsDep) -> ProjectDiscoveryResult:
+    return await discover_projects(session, settings.projects_root)
+
+
+@router.post("/{project_id}/onboard", response_model=ProjectOnboardingResult)
+async def onboard(
+    project_id: str, session: DbSessionDep, settings: SettingsDep
+) -> ProjectOnboardingResult:
+    return await onboard_project(session, project_id, settings.projects_root)
 
 
 @router.get("/{project_id}", response_model=ProjectRead)

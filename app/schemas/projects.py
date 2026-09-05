@@ -27,6 +27,7 @@ class BriefStatus(StrEnum):
 
 
 class ProjectEventType(StrEnum):
+    PROJECT_DISCOVERED = "project_discovered"
     TASK_CREATED = "task_created"
     PROMPT_GENERATED = "prompt_generated"
     TASK_STARTED = "task_started"
@@ -194,3 +195,34 @@ class ProjectEventEnvelope(BaseModel):
     event: ProjectEventRead
     project: ProjectRead
     task: ProjectTaskRead | None = None
+
+
+class DiscoveredProject(BaseModel):
+    id: str
+    name: str
+    path: str
+
+
+class IgnoredProjectFolder(BaseModel):
+    name: str
+    reason: str
+
+
+class ProjectDiscoveryResult(BaseModel):
+    newly_registered: list[DiscoveredProject]
+    already_known: list[DiscoveredProject]
+    ignored: list[IgnoredProjectFolder]
+    errors: list[str]
+
+
+class ProjectGitInfo(BaseModel):
+    branch: str | None
+    clean: bool | None
+    latest_commit: str | None
+
+
+class ProjectOnboardingResult(BaseModel):
+    project: ProjectRead
+    inspected_files: list[str]
+    top_level_entries: list[str]
+    git: ProjectGitInfo

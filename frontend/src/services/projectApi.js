@@ -100,3 +100,9 @@ export function subscribeToProjectEvents({ onEvent, onOpen, onError }) {
   });
   return () => source.close();
 }
+
+export async function fetchSystemStatus(signal) {
+  const response = await fetch(`${API_BASE_URL}/system/status`, { signal });
+  if (!response.ok) throw new Error(`System status request failed (${response.status}).`);
+  return response.json();
+}
